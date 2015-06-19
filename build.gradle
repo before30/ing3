@@ -1,0 +1,133 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.2.4.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+apply plugin: 'war'
+
+jar {
+    baseName = 'ing3-web'
+    version =  '0.0.1'
+}
+
+mainClassName = "me.joseph.MainApplication"
+
+war {
+    baseName = 'ing3-web'
+    version = '0.0.1'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "http://repo.spring.io/release" }
+    maven { url "http://repo.spring.io/milestone" }
+    maven { url "http://repo.spring.io/snapshot" }
+}
+
+configurations {
+    providedRuntime
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+configure(allprojects){
+    ext.slf4jVersion = '1.7.5'
+    ext.logbackVersion = '1.0.13'
+    ext.springBootVersion = '1.2.4.RELEASE'
+    ext.commonsLangVersion = '3.4'
+    ext.httpclientVersion = '4.2.2'
+    ext.guavaVersion = '18.0'
+    ext.junitVersion = '4.12'
+    ext.hibernateVresion = '4.3.10.Final'
+    ext.dbcpVersion = '2.1'
+    ext.commonsPoolVersion = '1.6'
+    ext.derbyVersion = '10.11.1.1'
+    ext.mysqlVersion = ''
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.3'
+}
+
+if (project.hasProperty('env')) {
+    println "Target environment: $env"
+} else {
+    ext.env = 'development'
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDir "profiles/$env"
+        }
+    }
+}
+
+dependencies {
+    configurations {
+        insecure.exclude module: 'spring-boot-starter-security'
+    }
+
+    insecure configurations.runtime
+
+    // spring boot
+    compile("org.springframework.boot:spring-boot-starter:$springBootVersion")
+    compile("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
+    compile("org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion")
+    compile("org.springframework.boot:spring-boot-starter:$springBootVersion")
+    compile("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
+    compile("org.springframework.boot:spring-boot-starter-security:$springBootVersion")
+
+    // tomcat configuration
+    runtime("org.springframework.boot:spring-boot-starter-tomcat:$springBootVersion")
+    runtime("org.apache.tomcat.embed:tomcat-embed-jasper:8.0.23")
+//    runtime("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
+    runtime("javax.servlet:jstl")
+
+    // db
+    compile("commons-pool:commons-pool:1.6")
+    compile('org.apache.derby:derby:10.11.1.1')
+    compile("mysql:mysql-connector-java:5.1.35")
+    compile("org.apache.commons:commons-dbcp2:2.1")
+    compile("org.hibernate:hibernate-validator")
+
+    // guava
+    compile("com.google.guava:guava:$guavaVersion")
+
+    // httpclient
+    compile("org.apache.httpcomponents:httpclient:$httpclientVersion")
+    compile("org.apache.httpcomponents:httpmime:$httpclientVersion")
+
+    // apache commons lang
+    compile('commons-lang:commons-lang:2.3')
+
+    // logback
+    compile("org.slf4j:slf4j-api:$slf4jVersion")
+    compile("ch.qos.logback:logback-classic:$logbackVersion")
+    compile("org.slf4j:jcl-over-slf4j:$slf4jVersion")
+
+    // json
+    compile("org.json:json:20141113")
+    compile("com.fasterxml.jackson.core:jackson-core:2.2.3")
+    compile("com.fasterxml.jackson.core:jackson-databind:2.2.3")
+
+
+    // unit-test
+    testCompile("junit:junit:$junitVersion")
+    testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
+    testCompile("com.jayway.jsonpath:json-path:2.0.0")
+}
+
+springBoot {
+    customConfiguration = "secure"
+    // secure, insecure
+}
